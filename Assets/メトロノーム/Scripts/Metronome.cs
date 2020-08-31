@@ -1,4 +1,5 @@
 ﻿using System;
+using DG.Tweening;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,7 @@ public class Metronome : MonoBehaviour
     public Text BPMの表示;
     public Slider BPMスライダー;
     public Button スタートボタン;
+    public Transform うごかすイラスト;
 
     private BoolReactiveProperty 再生中 = new BoolReactiveProperty(false);
     private double 経過時間 = 0;
@@ -18,7 +20,7 @@ public class Metronome : MonoBehaviour
     void Start()
     {
         スタートボタン.OnClickAsObservable()
-            .Subscribe(_=>再生中.Value = !再生中.Value)
+            .Subscribe(_ => 再生中.Value = !再生中.Value)
             .AddTo(this);
         BPMスライダー.minValue = 1;
         BPMスライダー.maxValue = 200;
@@ -28,7 +30,7 @@ public class Metronome : MonoBehaviour
             .Select(x => Mathf.FloorToInt(x))
             .Subscribe(bpm =>
             {
-                鳴らすべき間隔 = TimeSpan.FromSeconds(60.0f/bpm);
+                鳴らすべき間隔 = TimeSpan.FromSeconds(60.0f / bpm);
                 BPMの表示.text = bpm.ToString() + "BPM";
             })
             .AddTo(this);
@@ -50,7 +52,12 @@ public class Metronome : MonoBehaviour
         {
             タップ音.PlayOneShot(タップ音.clip);
             経過時間 -= 鳴らすべき間隔.TotalSeconds;
+            絵を動かす();
         }
+    }
 
+    private void 絵を動かす()
+    {
+        うごかすイラスト.DOJump(うごかすイラスト.position, 1, 1, 0.1f);
     }
 }
